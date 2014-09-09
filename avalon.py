@@ -85,30 +85,23 @@ def first_king(bot, trigger):
 
 
 def allocate_teams(bot, trigger):
-    random.shuffle(bot.people_seated)
-    if len(bot.people_seated) < 5:
+    n_players = len(bot.people_seated)
+    if n_players < 5:
         bot.say('Sorry, not enough people are seated at the round table for a game to be played.')
         initialise(bot, trigger)
-        return
-    elif len(bot.people_seated) > 10:
+    elif n_players > 10:
         bot.say('Too many adventurers! A maximum of ten players can go on the quest.')
-    elif len(bot.people_seated) == 5:
-        bot.lsoa = bot.people_seated[0:3]
-        bot.mom = bot.people_seated[3:5]
-    elif len(bot.people_seated) == 6:
-        bot.lsoa = bot.people_seated[0:4]
-        bot.mom = bot.people_seated[4:6]
-    elif len(bot.people_seated) == 7:
-        bot.lsoa = bot.people_seated[0:4]
-        bot.mom = bot.people_seated[4:7]
-    elif len(bot.people_seated) == 8:
-        bot.lsoa = bot.people_seated[0:5]
-        bot.mom = bot.people_seated[5:8]
-    elif len(bot.people_seated) == 9:
-        bot.lsoa = bot.people_seated[0:6]
-        bot.mom = bot.people_seated[6:9]
-    elif len(bot.people_seated) == 10:
-        bot.lsoa = bot.people_seated[0:6]
-        bot.mom = bot.people_seated[6:10]
+
+    random.shuffle(bot.people_seated)
+    n_good = {
+        5: 3,
+        6: 4,
+        7: 4,
+        8: 5,
+        9: 6,
+        10: 6,
+    }.get(n_players)
+    bot.lsoa = bot.people_seated[:n_good]
+    bot.mom = bot.people_seated[n_good:]
     bot.merlin = bot.lsoa[0]
     bot.assassin = bot.mom[0]
