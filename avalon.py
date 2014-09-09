@@ -89,6 +89,7 @@ def allocate_teams(bot, trigger):
     if n_players < 5:
         bot.say('Sorry, not enough people are seated at the round table for a game to be played.')
         initialise(bot, trigger)
+        return
     elif n_players > 10:
         bot.say('Too many adventurers! A maximum of ten players can go on the quest.')
 
