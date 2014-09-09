@@ -20,6 +20,8 @@ def initialise(bot, trigger):
     bot.current_king = None
     bot.game_state = 'NOGAME'  # states for the game to be in: NOGAME, SIGNUPS, KING_CHOOSING, APPROVAL, ON_QUEST, ASSASSINATION
     bot.turn_order = []
+    bot.n_players = 0
+    bot.n_good = 0
 
 @willie.module.commands('avalon')
 def avalon(bot, trigger):
@@ -85,24 +87,24 @@ def first_king(bot, trigger):
 
 
 def allocate_teams(bot, trigger):
-    n_players = len(bot.people_seated)
-    if n_players < 5:
+    bot.n_players = len(bot.people_seated)
+    if bot.n_players < 5:
         bot.say('Sorry, not enough people are seated at the round table for a game to be played.')
         initialise(bot, trigger)
         return
-    elif n_players > 10:
+    elif bot.n_players > 10:
         bot.say('Too many adventurers! A maximum of ten players can go on the quest.')
 
     random.shuffle(bot.people_seated)
-    n_good = {
+    bot.n_good = {
         5: 3,
         6: 4,
         7: 4,
         8: 5,
         9: 6,
         10: 6,
-    }.get(n_players)
-    bot.lsoa = bot.people_seated[:n_good]
-    bot.mom = bot.people_seated[n_good:]
+    }.get(bot.n_players)
+    bot.lsoa = bot.people_seated[:bot.n_good]
+    bot.mom = bot.people_seated[bot.n_good:]
     bot.merlin = bot.lsoa[0]
     bot.assassin = bot.mom[0]
