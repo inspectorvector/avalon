@@ -18,10 +18,13 @@ def initialise(bot, trigger):
     bot.merlin = None
     bot.assassin = None
     bot.current_king = None
+    bot.active_quest_slots = 0
     bot.game_state = 'NOGAME'  # states for the game to be in: NOGAME, SIGNUPS, KING_CHOOSING, APPROVAL, ON_QUEST, ASSASSINATION
     bot.turn_order = []
     bot.n_players = 0
     bot.n_good = 0
+    bot.kings_choices = []
+    bot.votes = {}
 
 @willie.module.commands('avalon')
 def avalon(bot, trigger):
@@ -64,6 +67,7 @@ def start(bot, trigger):
         bot.say('Welcome to a new game of Avalon!')
         bot.seats_available = False
         allocate_teams(bot, trigger)
+        allocate_quests(bot, trigger)
         if not bot.seats_available:
             for name in bot.mom:
                 if name == bot.assassin:
@@ -79,22 +83,27 @@ def start(bot, trigger):
     else:
         bot.say('You are not the current game leader, or a game of Avalon has not been started.')
 
+def king_choosing(bot, trigger):
+    bot.game_state = 'KING_CHOOSING'
+    bot.say(bot.current_king + ', as our king, you must choose' + bot.active_quest_slots + 'loyal knights to see this quest through. You may include yourself. ')
 
-def first_king(bot, trigger):
+def first_king(bot, trigger):  # shuffles players to get turn order and gets first king
     bot.turn_order = bot.people_seated
     random.shuffle(bot.turn_order)
     bot.say(bot.turn_order[0] + ' , you shall be the first king!')
+    bot.turn_order[0] = bot.current_king
 
 
 def allocate_teams(bot, trigger):
     bot.n_players = len(bot.people_seated)
     if bot.n_players < 5:
-        bot.say('Sorry, not enough people are seated at the round table for a game to be played.')
+        bot.say('Sorry, not enough people are seated at the round table for a game to be played. Start a new game with .avalon')
         initialise(bot, trigger)
         return
     elif bot.n_players > 10:
-        bot.say('Too many adventurers! A maximum of ten players can go on the quest.')
-
+        bot.say('Too many adventurers! A maximum of ten players can go on the quest. Start a new game with .avalon')
+        initialise(bot, trigger)
+        return
     random.shuffle(bot.people_seated)
     bot.n_good = {
         5: 3,
@@ -108,3 +117,13 @@ def allocate_teams(bot, trigger):
     bot.mom = bot.people_seated[bot.n_good:]
     bot.merlin = bot.lsoa[0]
     bot.assassin = bot.mom[0]
+
+def allocate_quests(bot, trigger):
+    bot.quests = {
+        5: [2, 3, 2, 3, 3],
+        6: [2, 3, 4, 3, 4],
+        7: [2, 3, 3, 4, 4],
+        8: [3, 4, 4, 5, 5],
+        9: [3, 4, 4, 5, 5],
+        10: [3, 4, 4, 5, 5]
+    }.get(bot.n_players)
